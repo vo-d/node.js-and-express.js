@@ -1,11 +1,36 @@
-const http = require('http');
+const express = require('express')
+const app= express();
+let {people} = require('./data')
 
-const server = http.createServer((req,res)=>{
-    console.log('user hit the server')
-    //provide info about the data that we're sending back
-    res.writeHead(200, {'content-type':'text/html'})
-    res.write('<h1>home page<h1>')
-    res.end()
+//static assets
+app.use(express.static('./methods-public'))
+
+//parse form data 
+app.use(express.urlencoded({extended:false}))
+
+// parse json
+app.use(express.json())
+
+app.get('/api/people', (req, res)=>{
+    res.status(200).json({success:true, data: people})
+}) 
+
+app.post('/api/people', (req, res)=>{
+    const {name} = req.body
+    if(!name){
+        return res.status(400).json({success:false, msg:'pls provide name value'})
+    }
+    res.status(201).json({success:true, person:name})
 })
 
-server.listen(5000);
+app.post('/login', (req, res)=>{
+    const {name} = req.body
+    if(name){
+        return res.status(200).send(`Welcome ${name}`)
+    }
+    res.status(401).send('Please provide credentials ')
+})
+app.listen(5000, ()=>{
+    console.log('Server is listening on port 5000.....')
+})
+
